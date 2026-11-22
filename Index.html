@@ -119,6 +119,7 @@
       cursor: pointer;
       display: flex;
       align-items: center;
+      justify-content: center;
       gap: 6px;
       transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
@@ -157,6 +158,43 @@
       margin: 0;
       font-weight: 600;
     }
+
+    /* Date Picker Section (Hidden initially) */
+    .date-section {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .date-input {
+      padding: 12px 18px;
+      border-radius: 14px;
+      border: 2px solid rgba(255, 139, 167, 0.6);
+      background: rgba(255, 255, 255, 0.85);
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: 600;
+      color: #333333;
+      outline: none;
+      width: 80%;
+      max-width: 240px;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .date-input:focus {
+      border-color: #FF8BA7;
+      box-shadow: 0 0 10px rgba(255, 139, 167, 0.3);
+    }
+
+    .date-error {
+      color: #d6336c;
+      font-size: 13px;
+      font-weight: 600;
+      margin: 0;
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -176,28 +214,73 @@
     </div>
     
     <p class="subtext">"No" seems a bit shy 😈</p>
+
+    <!-- Calendar Section (Shows after clicking Yes) -->
+    <div class="date-section" id="date-section">
+      <input type="date" id="date-picker" class="date-input">
+      <p class="date-error" id="date-error">Please pick a date first! 📅</p>
+      <button class="btn btn-yes" id="confirm-date">Confirm Date 💌</button>
+    </div>
   </div>
 
-  <!-- Script to handle dynamic text and moving button -->
+  <!-- Script to handle dynamic text, calendar, and moving button -->
   <script>
     // 1. YOUR CUSTOM TEXT
-    const customText = "Priyanshie, I feel like there's a spark between us. Am I reading that right, or am I totally off?";
+    const customText = "Nisha, will you go on a dinner date with me? 🍽️✨";
     document.getElementById('dynamic-message').innerText = customText;
 
     // 2. YOUR FORMSPREE ENDPOINT URL
     const formEndpoint = "https://formspree.io/f/xykrenzr"; 
 
-    // 3. SEND RESPONSE FUNCTION (Only runs when she clicks YES)
-    function sendResponse(answer) {
+    // Prevent picking past dates
+    const datePicker = document.getElementById('date-picker');
+    const today = new Date().toISOString().split('T')[0];
+    datePicker.setAttribute('min', today);
+
+    // 3. SHOW CALENDAR WHEN SHE CLICKS YES
+    document.querySelector('.btn-yes').addEventListener('click', function() {
       const messageElement = document.getElementById('dynamic-message');
       const buttonsElement = document.querySelector('.button-group');
       const subtextElement = document.querySelector('.subtext');
       const noButtonElement = document.querySelector('.btn-no');
+      const dateSection = document.getElementById('date-section');
 
-      // Hide the buttons and show a loading state
+      // Hide initial buttons and show calendar
       buttonsElement.style.display = 'none';
-      if(subtextElement) subtextElement.style.display = 'none';
-      noButtonElement.style.display = 'none'; 
+      if (subtextElement) subtextElement.style.display = 'none';
+      noButtonElement.style.display = 'none';
+
+      messageElement.innerText = "Yayy! Pick a date for our dinner 🍽️";
+      document.querySelector('.icon-placeholder').innerHTML = "😻<span class='heart-badge'>❤️</span>";
+      dateSection.style.display = 'flex';
+
+      // Open the native calendar automatically on supported browsers
+      if (datePicker.showPicker) {
+        try {
+          datePicker.showPicker();
+        } catch (e) {}
+      }
+    });
+
+    // 4. SEND RESPONSE + SELECTED DATE TO FORMSPREE
+    document.getElementById('confirm-date').addEventListener('click', function() {
+      const selectedDate = datePicker.value;
+      const dateError = document.getElementById('date-error');
+
+      if (!selectedDate) {
+        dateError.style.display = 'block';
+        return;
+      }
+
+      dateError.style.display = 'none';
+      sendResponse('Yes', selectedDate);
+    });
+
+    function sendResponse(answer, chosenDate) {
+      const messageElement = document.getElementById('dynamic-message');
+      const dateSection = document.getElementById('date-section');
+
+      dateSection.style.display = 'none';
       messageElement.innerText = "Sending... 💌";
 
       fetch(formEndpoint, {
@@ -208,13 +291,13 @@
         },
         body: JSON.stringify({
           Answer: `She clicked: ${answer}`,
-          Time: new Date().toLocaleString()
+          Selected_Date: chosenDate,
+          Submitted_At: new Date().toLocaleString()
         })
       })
       .then(response => {
         if (response.ok) {
-          messageElement.innerText = "Yayy! Can't wait! ✨";
-          document.querySelector('.icon-placeholder').innerHTML = "😻<span class='heart-badge'>❤️</span>";
+          messageElement.innerText = `Yayy! See you on ${chosenDate}! ✨`;
         } else {
           messageElement.innerText = "Oops, my internet broke. Tell me in person! 😅";
         }
@@ -223,14 +306,8 @@
         messageElement.innerText = "Oops, my internet broke. Tell me in person! 😅";
       });
     }
-
-    // Attach send functionality ONLY to the "Yes" button
-    document.querySelector('.btn-yes').addEventListener('click', function() {
-      sendResponse('Yes');
-    });
-
     // ---------------------------------------------------------
-    // 4. THE RUNAWAY "NO" BUTTON LOGIC (FIXED FOR LAPTOP/CARD TRAP)
+    // 5. THE RUNAWAY "NO" BUTTON LOGIC (FIXED FOR LAPTOP/CARD TRAP)
     // ---------------------------------------------------------
     const noButton = document.querySelector('.btn-no');
 
