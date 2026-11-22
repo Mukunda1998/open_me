@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spark Check</title>
+  <style>
+    /* Base Page Styling with Animated Gradient & Pattern */
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      /* Prevents the page from creating scrollbars when the button flies around */
+      overflow: hidden; 
+      
+      /* The new rich background */
+      background: linear-gradient(-45deg, #FFB7D1, #FFD1E1, #D1EDFB, #D1FBFB);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+    }
+
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Background decorative pattern */
+    body::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: radial-gradient(#ffffff 15%, transparent 16%), 
+                        radial-gradient(#ffffff 15%, transparent 16%);
+      background-size: 40px 40px;
+      background-position: 0 0, 20px 20px;
+      opacity: 0.3;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* Main Glassmorphism Card */
+    .card {
+      background: rgba(255, 255, 255, 0.35);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      border-radius: 24px;
+      padding: 40px 20px;
+      width: 85%;
+      max-width: 360px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      margin-bottom: 25px;
+      position: relative;
+      z-index: 10;
+    }
+
+    /* Cat & Heart Icon Container */
+    .icon-wrapper {
+      margin: 0 auto 20px;
+      position: relative;
+      width: 80px;
+      height: 80px;
+    }
+
+    .icon-placeholder {
+      font-size: 70px;
+      line-height: 1;
+      position: relative;
+      display: inline-block;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
+    }
+
+    .heart-badge {
+      position: absolute;
+      top: -5px;
+      right: -15px;
+      font-size: 35px;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+      100% { transform: scale(1); }
+    }
+
+    /* Main Dynamic Text Formatting */
+    .main-text {
+      font-size: 26px;
+      font-weight: 800;
+      color: #333333;
+      line-height: 1.25;
+      margin: 0 0 30px;
+      letter-spacing: -0.5px;
+      text-shadow: 0 2px 5px rgba(255, 255, 255, 0.8);
+    }
+
+    /* Button Layout */
+    .button-group {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 50px; 
+      padding: 14px 32px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+    }
+
+    .btn-yes {
+      background: #FF8BA7; 
+      color: white;
+      box-shadow: 0 6px 15px rgba(255, 139, 167, 0.4);
+    }
+    
+    .btn-yes:hover {
+      box-shadow: 0 8px 20px rgba(255, 139, 167, 0.6);
+    }
+
+    .btn-no {
+      background: #A1C4FD; 
+      color: white;
+      box-shadow: 0 6px 15px rgba(161, 196, 253, 0.4);
+      /* Ensures the button stays on top when it moves out of the card */
+      z-index: 100; 
+    }
+
+    .btn-no:hover {
+      box-shadow: 0 8px 20px rgba(161, 196, 253, 0.6);
+    }
+
+    /* "No seems a bit shy" text */
+    .subtext {
+      font-style: italic;
+      color: #9d3d75; 
+      font-size: 13px;
+      margin: 0;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- The Card Component -->
+  <div class="card">
+    
+    <div class="icon-wrapper">
+      <div class="icon-placeholder">🐱<span class="heart-badge">❤️</span></div>
+    </div>
+
+    <h1 class="main-text" id="dynamic-message">Loading...</h1>
+
+    <div class="button-group">
+      <button class="btn btn-yes">Yes ✨</button>
+      <button class="btn btn-no">No 🙈</button>
+    </div>
+    
+    <p class="subtext">"No" seems a bit shy 😈</p>
+  </div>
+
+  <!-- Script to handle dynamic text and moving button -->
+  <script>
+    // 1. YOUR CUSTOM TEXT
+    const customText = "Priyanshie, I feel like there's a spark between us. Am I reading that right, or am I totally off?";
+    document.getElementById('dynamic-message').innerText = customText;
+
+    // 2. YOUR FORMSPREE ENDPOINT URL
+    const formEndpoint = "https://formspree.io/f/xykrenzr"; 
+
+    // 3. SEND RESPONSE FUNCTION (Only runs when she clicks YES)
+    function sendResponse(answer) {
+      const messageElement = document.getElementById('dynamic-message');
+      const buttonsElement = document.querySelector('.button-group');
+      const subtextElement = document.querySelector('.subtext');
+      const noButtonElement = document.querySelector('.btn-no');
+
+      // Hide the buttons and show a loading state
+      buttonsElement.style.display = 'none';
+      if(subtextElement) subtextElement.style.display = 'none';
+      noButtonElement.style.display = 'none'; 
+      messageElement.innerText = "Sending... 💌";
+
+      fetch(formEndpoint, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          Answer: `She clicked: ${answer}`,
+          Time: new Date().toLocaleString()
+        })
+      })
+      .then(response => {
+        if (response.ok) {
+          messageElement.innerText = "Yayy! Can't wait! ✨";
+          document.querySelector('.icon-placeholder').innerHTML = "😻<span class='heart-badge'>❤️</span>";
+        } else {
+          messageElement.innerText = "Oops, my internet broke. Tell me in person! 😅";
+        }
+      })
+      .catch(error => {
+        messageElement.innerText = "Oops, my internet broke. Tell me in person! 😅";
+      });
+    }
+
+    // Attach send functionality ONLY to the "Yes" button
+    document.querySelector('.btn-yes').addEventListener('click', function() {
+      sendResponse('Yes');
+    });
+
+    // ---------------------------------------------------------
+    // 4. THE RUNAWAY "NO" BUTTON LOGIC (FIXED FOR LAPTOP/CARD TRAP)
+    // ---------------------------------------------------------
+    const noButton = document.querySelector('.btn-no');
+
+    function moveButton() {
+      // THE FIX: We must move the button entirely out of the glass card 
+      // and append it to the main body so the browser measures from the screen edges!
+      if (noButton.parentElement !== document.body) {
+        document.body.appendChild(noButton);
+      }
+
+      // Get the actual inner size of the browser window
+      const windowWidth = window.innerWidth;
+      const windowHeight = window.innerHeight;
+      
+      // Get the button's size
+      const buttonWidth = noButton.offsetWidth;
+      const buttonHeight = noButton.offsetHeight;
+
+      // SET A BUFFER (50 pixels) so it doesn't touch the edges
+      const buffer = 50;
+
+      // Calculate the maximum X and Y coordinates (Window size - button size - buffer zone)
+      const maxX = windowWidth - buttonWidth - buffer;
+      const maxY = windowHeight - buttonHeight - buffer;
+
+      // Generate random coordinates
+      const randomX = Math.max(buffer, Math.floor(Math.random() * maxX));
+      const randomY = Math.max(buffer, Math.floor(Math.random() * maxY));
+
+      // Apply the new position
+      noButton.style.position = 'fixed';
+      noButton.style.left = `${randomX}px`;
+      noButton.style.top = `${randomY}px`;
+      
+      // Add a smooth transition so it glides away
+      noButton.style.transition = 'all 0.2s ease-out';
+    }
+
+    // Move it when a computer mouse hovers over it
+    noButton.addEventListener('mouseover', moveButton);
+
+    // Move it when a phone finger tries to tap it
+    noButton.addEventListener('touchstart', function(event) {
+      event.preventDefault(); // Stops the tap from registering
+      moveButton();
+    });
+  </script>
+
+</body>
+</html>
